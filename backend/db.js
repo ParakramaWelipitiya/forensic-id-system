@@ -9,7 +9,7 @@ const pool = new Pool({
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
-});
+}); 
 
 // Test the connection log
 pool.query('SELECT NOW()', (err, res) => {
