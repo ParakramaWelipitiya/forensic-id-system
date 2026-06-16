@@ -3,9 +3,13 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const pool = require('./db'); // Import the database connection
+const multer = require('multer');
+const axios = require('axios');
+const FormData = require('form-data');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Middleware
 app.use(cors());
@@ -19,33 +23,60 @@ app.get('/api/status', (req, res) => {
     });
 });
 // Route to create a new unidentified remains case
-app.post('/api/cases', async (req, res) => {
+app.post('/api/cases', upload.single('image'), async (req, res) => {
     try {
-        // Extract the data sent from the React frontend
         const { caseNumber, location, notes } = req.body;
 
-        // Package the text notes into a JSON object for the found_artifacts column
-        const artifactsJson = JSON.stringify({ initial_notes: notes });
+        // 1. Check if a file was actually uploaded
+        if (!req.file) {
+            return res.status(400).json({ error: "Postmortem image is required for AI analysis." });
+        }
 
-        // The SQL query to insert the data safely (using $1, $2 to prevent SQL injection)
+        console.log(`Processing case ${caseNumber}. Forwarding image to AI...`);
+
+        // 2. Package the image to send to the Python Microservice
+        const aiFormData = new FormData();
+        aiFormData.append('file', req.file.buffer, req.file.originalname);
+
+        // 3. Send to Python (Running on Port 8000)
+        const pythonResponse = await axios.post('http://localhost:8000/analyze', aiFormData, {
+            headers: {
+                ...aiFormData.getHeaders(),
+            },
+        });
+
+        const aiData = pythonResponse.data.ai_prediction;
+        console.log("AI Prediction Received:", aiData);
+
+        // 4. Combine investigator notes with AI found artifacts
+        const combinedArtifacts = JSON.stringify({
+            investigator_notes: notes,
+            ai_detected_items: aiData.found_artifacts.detected_items
+        });
+
+        // 5. Save EVERYTHING to PostgreSQL
         const newCase = await pool.query(
             `INSERT INTO unidentified_remains 
-            (recovery_case_number, recovery_location, found_artifacts) 
-            VALUES ($1, $2, $3) 
+            (recovery_case_number, recovery_location, found_artifacts, 
+             predicted_sex, predicted_age_min, predicted_age_max, 
+             predicted_height_cm_min, predicted_height_cm_max, ai_confidence_score) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
             RETURNING *`,
-            [caseNumber, location, artifactsJson]
+            [
+                caseNumber, location, combinedArtifacts,
+                aiData.predicted_sex, aiData.predicted_age_min, aiData.predicted_age_max,
+                aiData.predicted_height_cm_min, aiData.predicted_height_cm_max, aiData.confidence_score
+            ]
         );
 
-        // Send a success response back to React
         res.status(201).json({
-            message: "Case successfully logged to database.",
+            message: "Case logged and AI analysis complete.",
             case: newCase.rows[0]
         });
 
     } catch (err) {
-        console.error("Database Insert Error:", err.message);
-        // Send a 500 server error back if something goes wrong (e.g., duplicate case number)
-        res.status(500).json({ error: "Failed to log case. Case number might already exist." });
+        console.error("System Error:", err.message);
+        res.status(500).json({ error: "Failed to process case and communicate with AI." });
     }
 });
 

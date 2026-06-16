@@ -1,6 +1,6 @@
 // frontend/src/pages/UploadForm.jsx
 import { useState } from 'react';
-import api from '../api'; // Import the axios configuration we made earlier
+import api from '../api';
 
 export default function UploadForm() {
   const [formData, setFormData] = useState({
@@ -9,30 +9,54 @@ export default function UploadForm() {
     notes: ''
   });
   
-  // State to handle UI feedback (loading, success, error)
+  // NEW: State to hold the selected image file
+  const [imageFile, setImageFile] = useState(null);
   const [statusMessage, setStatusMessage] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // NEW: Handle file selection
+  const handleFileChange = (e) => {
+    setImageFile(e.target.files[0]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatusMessage('Saving to database...');
+    if (!imageFile) {
+      setStatusMessage("Please select an image for analysis.");
+      return;
+    }
+
+    setStatusMessage('Transmitting data to AI Engine...');
+    setIsProcessing(true);
+
+    // NEW: Package data as FormData so the file can be sent
+    const submitData = new FormData();
+    submitData.append('caseNumber', formData.caseNumber);
+    submitData.append('location', formData.location);
+    submitData.append('notes', formData.notes);
+    submitData.append('image', imageFile); // Attach the file!
 
     try {
-      // Send a POST request to your new backend route
-      const response = await api.post('/cases', formData);
+      // Note: We don't use 'formData' here, we use the 'submitData' object we just built
+      const response = await api.post('/cases', submitData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       
-      setStatusMessage('Success! Case securely logged.');
-      console.log('Backend Response:', response.data);
-      
-      // Clear the form after successful submission
+      setStatusMessage('Success! Case logged & AI Analysis complete.');
       setFormData({ caseNumber: '', location: '', notes: '' });
+      setImageFile(null); // Clear the file input
+      
+      // Reset the physical file input field
+      document.getElementById('image-upload').value = '';
       
     } catch (error) {
-      console.error('Error submitting form:', error);
       setStatusMessage(error.response?.data?.error || 'Failed to connect to the server.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -45,22 +69,22 @@ export default function UploadForm() {
       <form onSubmit={handleSubmit} style={{ backgroundColor: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
         
         <label style={{ fontWeight: '500', color: '#334155' }}>Recovery Case Number</label>
-        <input type="text" name="caseNumber" value={formData.caseNumber} required onChange={handleChange} style={inputStyle} placeholder="e.g., DOE-2026-001" />
+        <input type="text" name="caseNumber" value={formData.caseNumber} required onChange={handleChange} style={inputStyle} />
 
         <label style={{ fontWeight: '500', color: '#334155' }}>Recovery Location</label>
-        <input type="text" name="location" value={formData.location} required onChange={handleChange} style={inputStyle} placeholder="Enter exact address or coordinates" />
+        <input type="text" name="location" value={formData.location} required onChange={handleChange} style={inputStyle} />
 
-        <label style={{ fontWeight: '500', color: '#334155' }}>Postmortem Images (Text-only for now)</label>
-        <input type="file" multiple accept="image/*" disabled style={{...inputStyle, backgroundColor: '#f1f5f9'}} title="Image upload will be activated in the AI phase" />
+        {/* UPDATED: File input is now active */}
+        <label style={{ fontWeight: '500', color: '#334155' }}>Postmortem Image (Required for AI)</label>
+        <input type="file" id="image-upload" accept="image/*" onChange={handleFileChange} required style={inputStyle} />
 
-        <label style={{ fontWeight: '500', color: '#334155' }}>Initial Findings / Found Artifacts</label>
-        <textarea name="notes" rows="4" value={formData.notes} onChange={handleChange} style={inputStyle} placeholder="Describe any distinctive items..."></textarea>
+        <label style={{ fontWeight: '500', color: '#334155' }}>Initial Findings / Investigator Notes</label>
+        <textarea name="notes" rows="4" value={formData.notes} onChange={handleChange} style={inputStyle}></textarea>
 
-        <button type="submit" style={{ width: '100%', padding: '12px', backgroundColor: '#0ea5e9', color: 'white', border: 'none', borderRadius: '4px', fontSize: '1rem', cursor: 'pointer', fontWeight: 'bold' }}>
-          Log Case to Database
+        <button type="submit" disabled={isProcessing} style={{ width: '100%', padding: '12px', backgroundColor: isProcessing ? '#94a3b8' : '#0ea5e9', color: 'white', border: 'none', borderRadius: '4px', fontSize: '1rem', cursor: isProcessing ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}>
+          {isProcessing ? 'AI Engine Analyzing...' : 'Submit to AI Engine'}
         </button>
 
-        {/* Display success or error messages to the user */}
         {statusMessage && (
           <div style={{ marginTop: '15px', padding: '10px', borderRadius: '4px', backgroundColor: statusMessage.includes('Success') ? '#dcfce7' : '#fee2e2', color: statusMessage.includes('Success') ? '#166534' : '#991b1b', textAlign: 'center' }}>
             {statusMessage}
