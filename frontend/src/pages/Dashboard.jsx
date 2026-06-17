@@ -1,5 +1,5 @@
 // frontend/src/pages/Dashboard.jsx
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../api';
 
 export default function Dashboard() {
@@ -71,7 +71,7 @@ export default function Dashboard() {
             </thead>
             <tbody>
               {cases.map((c) => (
-                <text-fragment key={c.id}>
+                <React.Fragment key={c.id}>
                   {/* Main Case Row */}
                   <tr style={{ borderBottom: selectedCaseId === c.id ? 'none' : '1px solid #e2e8f0', backgroundColor: selectedCaseId === c.id ? '#f8fafc' : 'white' }}>
                     <td style={{ padding: '15px 20px', fontWeight: '500', color: '#0f172a' }}>{c.recovery_case_number}</td>
@@ -123,16 +123,30 @@ export default function Dashboard() {
                           ) : (
                             <div style={{ display: 'grid', gap: '15px' }}>
                               {potentialMatches.map((match) => (
-                                <div key={match.id} style={{ borderLeft: '4px solid #0ea5e9', paddingLeft: '15px', paddingY: '5px' }}>
-                                  <div style={{ fontWeight: '600', color: '#0f172a' }}>
-                                    {match.first_name} {match.last_name} ({match.case_number})
+                                <div key={match.id} style={{ borderLeft: '4px solid #0ea5e9', paddingLeft: '15px', backgroundColor: '#fdfdfd', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '15px' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ fontWeight: '600', color: '#0f172a', fontSize: '1.05rem' }}>
+                                      {match.first_name} {match.last_name} ({match.case_number})
+                                    </span>
+                                    {/* Calculated Match Score Badge */}
+                                    <span style={{ backgroundColor: match.match_probability > 70 ? '#dcfce7' : '#f1f5f9', color: match.match_probability > 70 ? '#15803d' : '#475569', padding: '4px 10px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                      Match Confidence: {match.match_probability}%
+                                    </span>
                                   </div>
-                                  <div style={{ fontSize: '0.9rem', color: '#475569', marginTop: '4px' }}>
-                                    <strong>Age Range:</strong> {match.age_min} - {match.age_max} yrs | <strong>Sex:</strong> {match.biological_sex}
+                                  
+                                  <div style={{ fontSize: '0.9rem', color: '#475569', marginTop: '6px' }}>
+                                    <strong>Biological Profile:</strong> {match.biological_sex} | {match.age_min} - {match.age_max} yrs
                                   </div>
                                   <div style={{ fontSize: '0.9rem', color: '#475569' }}>
                                     <strong>Last Known Location:</strong> {match.last_known_location}
                                   </div>
+
+                                  {/* Dynamic Link Pill for AI Detected Artifact Hits */}
+                                  {match.matched_evidence && match.matched_evidence.length > 0 && (
+                                    <div style={{ marginTop: '10px', fontSize: '0.85rem', backgroundColor: '#eff6ff', color: '#1e40af', padding: '6px 10px', borderRadius: '4px', display: 'inline-block', fontWeight: '500' }}>
+                                      🔗 Linked Evidence: {match.matched_evidence.join(', ')}
+                                    </div>
+                                  )}
                                 </div>
                               ))}
                             </div>
@@ -141,7 +155,7 @@ export default function Dashboard() {
                       </td>
                     </tr>
                   )}
-                </text-fragment>
+                </React.Fragment>
               ))}
             </tbody>
           </table>
