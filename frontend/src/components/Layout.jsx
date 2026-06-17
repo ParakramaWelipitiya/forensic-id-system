@@ -23,6 +23,11 @@ export default function Layout() {
             style={{ display: 'block', padding: '15px 20px', color: location.pathname === '/upload' ? '#38bdf8' : '#cbd5e1', backgroundColor: location.pathname === '/upload' ? '#0f172a' : 'transparent' }}>
             Upload Case Data
           </Link>
+          <Link 
+            to="/registry" 
+            style={{ display: 'block', padding: '15px 20px', color: location.pathname === '/registry' ? '#38bdf8' : '#cbd5e1', backgroundColor: location.pathname === '/registry' ? '#0f172a' : 'transparent' }}>
+            Missing Persons Registry
+          </Link>
         </nav>
       </aside>
 

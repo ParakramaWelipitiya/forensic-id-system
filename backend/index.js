@@ -205,6 +205,40 @@ app.get('/api/cases/:id/matches', async (req, res) => {
     }
 });
 
+app.post('/api/missing', async (req, res) => {
+    try {
+        const { 
+            caseNumber, firstName, lastName, 
+            ageMin, ageMax, biologicalSex, 
+            heightMin, heightMax, location, artifacts 
+        } = req.body;
+
+        // Convert the comma-separated or raw text artifacts into a structured JSON object
+        const artifactsJson = JSON.stringify({ description: artifacts });
+
+        const newMissingPerson = await pool.query(
+            `INSERT INTO missing_persons 
+            (case_number, first_name, last_name, age_min, age_max, 
+             biological_sex, height_cm_min, height_cm_max, last_known_location, artifacts) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
+            RETURNING *`,
+            [
+                caseNumber, firstName, lastName, ageMin, ageMax, 
+                biologicalSex, heightMin, heightMax, location, artifactsJson
+            ]
+        );
+
+        res.status(201).json({
+            message: "Missing person record successfully registered.",
+            person: newMissingPerson.rows[0]
+        });
+
+    } catch (err) {
+        console.error("Missing Registry Error:", err.message);
+        res.status(500).json({ error: "Failed to register missing person. Case number may be duplicate." });
+    }
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is locked in and running on port ${PORT}`);
