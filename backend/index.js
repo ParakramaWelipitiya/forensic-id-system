@@ -95,6 +95,59 @@ app.get('/api/cases', async (req, res) => {
     }
 });
 
+// Route to find potential matches for a specific unidentified case
+app.get('/api/cases/:id/matches', async (req, res) => {
+    try {
+        const caseId = req.params.id;
+
+        // 1. Get the target unidentified case and its AI predictions
+        const targetCase = await pool.query(
+            'SELECT * FROM unidentified_remains WHERE id = $1',
+            [caseId]
+        );
+
+        if (targetCase.rows.length === 0) {
+            return res.status(404).json({ error: "Case not found." });
+        }
+
+        const aiData = targetCase.rows[0];
+
+        // If AI hasn't processed it yet, we can't match it
+        if (!aiData.predicted_sex) {
+            return res.json({ message: "Awaiting AI analysis before matching.", matches: [] });
+        }
+
+        // 2. The Matching Query
+        // This SQL query looks for missing persons with the exact same sex, 
+        // AND where the missing person's age overlaps with the AI's predicted age range.
+        const matches = await pool.query(
+            `SELECT * FROM missing_persons 
+             WHERE biological_sex = $1
+             AND (
+                 (age_min <= $2 AND age_max >= $3) OR -- AI range falls inside Missing Person range
+                 (age_min >= $3 AND age_min <= $2) OR -- Missing Person min age falls inside AI range
+                 (age_max >= $3 AND age_max <= $2)    -- Missing Person max age falls inside AI range
+             )
+             ORDER BY created_at DESC`,
+            [
+                aiData.predicted_sex, 
+                aiData.predicted_age_max, // $2
+                aiData.predicted_age_min  // $3
+            ]
+        );
+
+        res.json({
+            target_case: targetCase.rows[0].recovery_case_number,
+            total_matches_found: matches.rows.length,
+            matches: matches.rows
+        });
+
+    } catch (err) {
+        console.error("Matching Algorithm Error:", err.message);
+        res.status(500).json({ error: "Failed to run cross-reference matching." });
+    }
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is locked in and running on port ${PORT}`);

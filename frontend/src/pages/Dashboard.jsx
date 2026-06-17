@@ -5,8 +5,13 @@ import api from '../api';
 export default function Dashboard() {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Track which case is currently expanded to show matches
+  const [selectedCaseId, setSelectedCaseId] = useState(null);
+  const [potentialMatches, setPotentialMatches] = useState([]);
+  const [loadingMatches, setLoadingMatches] = useState(false);
 
-  // Fetch data from the backend when the dashboard loads
+  // Fetch all cases on page load
   useEffect(() => {
     const fetchCases = async () => {
       try {
@@ -21,6 +26,29 @@ export default function Dashboard() {
 
     fetchCases();
   }, []);
+
+  // Function to trigger the matching engine for a specific case
+  const handleViewMatches = async (caseId) => {
+    // If the user clicks the same case again, collapse it
+    if (selectedCaseId === caseId) {
+      setSelectedCaseId(null);
+      setPotentialMatches([]);
+      return;
+    }
+
+    setSelectedCaseId(caseId);
+    setLoadingMatches(true);
+    setPotentialMatches([]);
+
+    try {
+      const response = await api.get(`/cases/${caseId}/matches`);
+      setPotentialMatches(response.data.matches);
+    } catch (error) {
+      console.error("Error cross-referencing matches:", error);
+    } finally {
+      setLoadingMatches(false);
+    }
+  };
 
   return (
     <div>
@@ -38,45 +66,82 @@ export default function Dashboard() {
                 <th style={{ padding: '15px 20px' }}>Case Number</th>
                 <th style={{ padding: '15px 20px' }}>Location</th>
                 <th style={{ padding: '15px 20px' }}>AI Anthropological Profile</th>
-                <th style={{ padding: '15px 20px' }}>AI Confidence</th>
-                <th style={{ padding: '15px 20px' }}>Date Logged</th>
+                <th style={{ padding: '15px 20px' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {cases.map((c) => (
-                <tr key={c.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '15px 20px', fontWeight: '500', color: '#0f172a' }}>{c.recovery_case_number}</td>
-                  <td style={{ padding: '15px 20px', color: '#475569' }}>{c.recovery_location}</td>
-                  
-                  {/* Dynamic AI Status Column */}
-                  <td style={{ padding: '15px 20px' }}>
-                    {c.predicted_sex ? (
-                      <div>
-                        <span style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                          Analysis Complete
-                        </span>
-                        <div style={{ marginTop: '8px', fontSize: '0.9rem', color: '#475569' }}>
-                          <strong>Sex:</strong> {c.predicted_sex} <br/>
-                          <strong>Est. Age:</strong> {c.predicted_age_min} - {c.predicted_age_max} yrs <br/>
-                          <strong>Est. Height:</strong> {c.predicted_height_cm_min} - {c.predicted_height_cm_max} cm
+                <text-fragment key={c.id}>
+                  {/* Main Case Row */}
+                  <tr style={{ borderBottom: selectedCaseId === c.id ? 'none' : '1px solid #e2e8f0', backgroundColor: selectedCaseId === c.id ? '#f8fafc' : 'white' }}>
+                    <td style={{ padding: '15px 20px', fontWeight: '500', color: '#0f172a' }}>{c.recovery_case_number}</td>
+                    <td style={{ padding: '15px 20px', color: '#475569' }}>{c.recovery_location}</td>
+                    
+                    <td style={{ padding: '15px 20px' }}>
+                      {c.predicted_sex ? (
+                        <div>
+                          <span style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                            Analysis Complete
+                          </span>
+                          <div style={{ marginTop: '8px', fontSize: '0.9rem', color: '#475569' }}>
+                            <strong>Sex:</strong> {c.predicted_sex} | <strong>Age:</strong> {c.predicted_age_min}-{c.predicted_age_max} yrs
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <span style={{ backgroundColor: '#fef3c7', color: '#b45309', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                        Pending Analysis
-                      </span>
-                    )}
-                  </td>
+                      ) : (
+                        <span style={{ backgroundColor: '#fef3c7', color: '#b45309', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                          Pending Analysis
+                        </span>
+                      )}
+                    </td>
 
-                  {/* Confidence Score Column */}
-                  <td style={{ padding: '15px 20px', color: '#475569', fontWeight: '500' }}>
-                    {c.ai_confidence_score ? `${(c.ai_confidence_score * 100).toFixed(0)}%` : 'N/A'}
-                  </td>
+                    <td style={{ padding: '15px 20px' }}>
+                      {c.predicted_sex ? (
+                        <button 
+                          onClick={() => handleViewMatches(c.id)}
+                          style={{ padding: '6px 12px', backgroundColor: selectedCaseId === c.id ? '#475569' : '#0ea5e9', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>
+                          {selectedCaseId === c.id ? 'Hide Matches' : 'View Matches'}
+                        </button>
+                      ) : (
+                        <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Awaiting AI</span>
+                      )}
+                    </td>
+                  </tr>
 
-                  <td style={{ padding: '15px 20px', color: '#475569' }}>
-                    {new Date(c.created_at).toLocaleDateString()}
-                  </td>
-                </tr>
+                  {/* Expanded Matching Panel Row */}
+                  {selectedCaseId === c.id && (
+                    <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                      <td colSpan="4" style={{ padding: '0 20px 20px 20px' }}>
+                        <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '20px' }}>
+                          <h3 style={{ color: '#0f172a', marginBottom: '15px', fontSize: '1rem' }}>
+                            Cross-Reference Engine Results ({potentialMatches.length} Potential Leads Found)
+                          </h3>
+                          
+                          {loadingMatches ? (
+                            <p style={{ color: '#64748b' }}>Scanning missing persons database...</p>
+                          ) : potentialMatches.length === 0 ? (
+                            <p style={{ color: '#b45309' }}>No overlapping cases found matching this biological profile in the system.</p>
+                          ) : (
+                            <div style={{ display: 'grid', gap: '15px' }}>
+                              {potentialMatches.map((match) => (
+                                <div key={match.id} style={{ borderLeft: '4px solid #0ea5e9', paddingLeft: '15px', paddingY: '5px' }}>
+                                  <div style={{ fontWeight: '600', color: '#0f172a' }}>
+                                    {match.first_name} {match.last_name} ({match.case_number})
+                                  </div>
+                                  <div style={{ fontSize: '0.9rem', color: '#475569', marginTop: '4px' }}>
+                                    <strong>Age Range:</strong> {match.age_min} - {match.age_max} yrs | <strong>Sex:</strong> {match.biological_sex}
+                                  </div>
+                                  <div style={{ fontSize: '0.9rem', color: '#475569' }}>
+                                    <strong>Last Known Location:</strong> {match.last_known_location}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </text-fragment>
               ))}
             </tbody>
           </table>
