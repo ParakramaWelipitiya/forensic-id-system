@@ -37,9 +37,15 @@ export default function Layout() {
         {/* Header */}
         <header style={{ height: '60px', backgroundColor: 'white', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', padding: '0 30px', justifyContent: 'space-between' }}>
           <h2 style={{ fontSize: '1.2rem', color: '#475569' }}>Investigator Portal</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '35px', height: '35px', borderRadius: '50%', backgroundColor: '#e2e8f0' }}></div>
-            <span style={{ fontWeight: '500' }}>Admin Agent</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <span style={{ fontWeight: '500', color: '#334155' }}>
+              ID: {localStorage.getItem('username') || 'Agent'}
+            </span>
+            <button 
+              onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
+              style={{ padding: '4px 10px', fontSize: '0.85rem', color: '#991b1b', backgroundColor: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '4px', cursor: 'pointer', fontWeight: '600' }}>
+              Log Out
+            </button>
           </div>
         </header>
 

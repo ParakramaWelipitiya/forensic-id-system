@@ -6,14 +6,94 @@ const pool = require('./db'); // Import the database connection
 const multer = require('multer');
 const axios = require('axios');
 const FormData = require('form-data');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const upload = multer({ storage: multer.memoryStorage() });
+const JWT_SECRET = process.env.JWT_SECRET || "forensic_intelligence_protocol_secret_key";
+
+// Middleware to verify JWT token and protect sensitive forensic routes
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Extract token from "Bearer <token>"
+
+    if (!token) {
+        return res.status(401).json({ error: "Access denied. Authentication token missing." });
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({ error: "Session expired or invalid token." });
+        }
+        req.user = user; // Attach user info to the request object
+        next(); // Pass control to the next route handler
+    });
+};
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Route to create a new investigator account (Seed account setup)
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        // Hash the password using a salt factor of 10 rounds
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        const newUser = await pool.query(
+            'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username, role',
+            [username, hashedPassword]
+        );
+
+        res.status(201).json({ message: "User registered successfully.", user: newUser.rows[0] });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Username already exists or database failure." });
+    }
+});
+
+// Route to log in an investigator and issue a secure JWT session token
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // Check if user exists
+        const userQuery = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        if (userQuery.rows.length === 0) {
+            return res.status(400).json({ error: "Invalid username credentials." });
+        }
+
+        const user = userQuery.rows[0];
+
+        // Compare incoming plain-text password with the database hash
+        const validPassword = await bcrypt.compare(password, user.password_hash);
+        if (!validPassword) {
+            return res.status(400).json({ error: "Invalid password credentials." });
+        }
+
+        // Generate the JWT token (Expires in 2 hours)
+        const token = jwt.sign(
+            { userId: user.id, username: user.username, role: user.role },
+            JWT_SECRET,
+            { expiresIn: '2h' }
+        );
+
+        res.json({
+            message: "Authentication successful.",
+            token: token,
+            user: { username: user.username, role: user.role }
+        });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Internal server authentication error." });
+    }
+});
 
 // Basic health-check route
 app.get('/api/status', (req, res) => {
@@ -23,7 +103,7 @@ app.get('/api/status', (req, res) => {
     });
 });
 // backend/index.js (Updated POST route with explicit IPv4 and enhanced debugging)
-app.post('/api/cases', upload.single('image'), async (req, res) => {
+app.post('/api/cases',authenticateToken, upload.single('image'), async (req, res) => {
     try {
         const { caseNumber, location, notes } = req.body;
 
@@ -100,7 +180,7 @@ app.post('/api/cases', upload.single('image'), async (req, res) => {
 });
 
 // Route to fetch all unidentified remains cases
-app.get('/api/cases', async (req, res) => {
+app.get('/api/cases',authenticateToken, async (req, res) => {
     try {
         // Fetch all rows, sorted by the newest first
         const allCases = await pool.query(
@@ -115,7 +195,7 @@ app.get('/api/cases', async (req, res) => {
 });
 
 // backend/index.js (Upgraded Matching Algorithm with Artifact Weighting)
-app.get('/api/cases/:id/matches', async (req, res) => {
+app.get('/api/cases/:id/matches', authenticateToken, async (req, res) => {
     try {
         const caseId = req.params.id;
 
@@ -205,7 +285,7 @@ app.get('/api/cases/:id/matches', async (req, res) => {
     }
 });
 
-app.post('/api/missing', async (req, res) => {
+app.post('/api/missing', authenticateToken, async (req, res) => {
     try {
         const { 
             caseNumber, firstName, lastName, 

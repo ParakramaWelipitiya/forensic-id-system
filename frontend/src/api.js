@@ -2,8 +2,21 @@
 import axios from 'axios';
 
 const api = axios.create({
-    // This points to your Node.js backend
     baseURL: 'http://localhost:5000/api', 
 });
+
+// Intercept all outgoing requests and automatically inject the JWT token if available
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
 export default api;
