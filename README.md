@@ -190,7 +190,7 @@ JWT_SECRET=forensic_secret_key_123
 Start the backend server:
 
 ```bash
-npm run dev
+npx nodemon index.js
 ```
 
 ---
