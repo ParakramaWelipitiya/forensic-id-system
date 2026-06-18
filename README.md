@@ -50,6 +50,54 @@ The application is built on a distributed microservice architecture to ensure sc
 
 ---
 
+## Platform Screenshots
+
+<table>
+<tr>
+<td width="50%" align="center">
+
+### Authentication Portal
+
+Secure investigator login with JWT authentication.
+
+<img src="https://github.com/user-attachments/assets/daea6129-551e-4348-9457-b800f9cdde87" width="100%">
+
+</td>
+
+<td width="50%" align="center">
+
+### Investigator Dashboard
+
+Real-time case monitoring and analysis overview.
+
+<img src="https://github.com/user-attachments/assets/5f7df106-17ae-4551-8c8f-a6eacf3d2aba" width="100%">
+
+</td>
+</tr>
+
+<tr>
+<td width="50%" align="center">
+
+### Missing Persons Registry
+
+Management of missing persons records.
+
+<img src="https://github.com/user-attachments/assets/f23d2926-fd03-4494-ad53-049a3eb5368e" width="100%">
+
+</td>
+
+<td width="50%" align="center">
+
+### Upload Unidentified Remains
+
+AI-powered evidence submission workflow.
+
+<img src="https://github.com/user-attachments/assets/c0e50454-a2de-4436-8649-6ea4e2668e01" width="100%">
+
+</td>
+</tr>
+</table>
+
 ## Prerequisites
 
 To run this application locally, ensure the following are installed:
