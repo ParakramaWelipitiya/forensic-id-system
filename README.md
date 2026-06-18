@@ -210,7 +210,7 @@ Because the application is secured by JWT, create a seed account before logging 
 
 ### Windows PowerShell
 
-Rename Username and Password.
+> **Note:** Rename Username and Password.
 
 ```powershell
 Invoke-RestMethod -Uri "http://localhost:5000/api/auth/register" -Method Post -ContentType "application/json" -Body '{"username":"agent001","password":"securepassword"}'
@@ -262,7 +262,7 @@ Enter mock data for a missing individual.
 Example:
 
 ```text
-John Doe
+Amal Perera
 Male
 Age: 20-30
 Location: Gampaha
@@ -354,13 +354,13 @@ The missing person created in Step 3 should appear as a high-probability match.
 
 ---
 
-# 👨‍💻 Author
+#  Author
 
 **Parakrama Welipitiya**
 
 ---
 
-## 🚀 Technology Stack
+## Technology Stack
 
 ```text
 Frontend     : React.js
