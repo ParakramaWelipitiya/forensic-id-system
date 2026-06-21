@@ -49,6 +49,13 @@ The application is built on a distributed microservice architecture to ensure sc
 | Image Processing        | OpenCV           | Matrix pre-processing       |
 
 ---
+## High-Level System Architecture Diagram
+<img width="7894" height="3500" alt="1  High-Level System Architecture Diagram" src="https://github.com/user-attachments/assets/48a87c20-a4b5-4f5d-8c1b-5f44824ff8f9" />
+
+## Core Workflow Sequence Diagram
+<img width="4034" height="3300" alt="Core Workflow Sequence Diagram " src="https://github.com/user-attachments/assets/aaaa4079-fce6-47ad-b070-3ff0c70cd013" />
+
+---
 
 ## Platform Screenshots
 
