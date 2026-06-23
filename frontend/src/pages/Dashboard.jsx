@@ -5,13 +5,10 @@ import api from '../api';
 export default function Dashboard() {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Track which case is currently expanded to show matches
   const [selectedCaseId, setSelectedCaseId] = useState(null);
   const [potentialMatches, setPotentialMatches] = useState([]);
   const [loadingMatches, setLoadingMatches] = useState(false);
 
-  // Fetch all cases on page load
   useEffect(() => {
     const fetchCases = async () => {
       try {
@@ -23,144 +20,155 @@ export default function Dashboard() {
         setLoading(false);
       }
     };
-
     fetchCases();
   }, []);
 
-  // Function to trigger the matching engine for a specific case
   const handleViewMatches = async (caseId) => {
-    // If the user clicks the same case again, collapse it
     if (selectedCaseId === caseId) {
       setSelectedCaseId(null);
       setPotentialMatches([]);
       return;
     }
-
     setSelectedCaseId(caseId);
     setLoadingMatches(true);
     setPotentialMatches([]);
-
     try {
       const response = await api.get(`/cases/${caseId}/matches`);
       setPotentialMatches(response.data.matches);
     } catch (error) {
-      console.error("Error cross-referencing matches:", error);
+      console.error("Error cross-referencing:", error);
     } finally {
       setLoadingMatches(false);
     }
   };
 
+  if (loading) {
+    return <p style={{ color: '#64748b', fontSize: '1rem', fontFamily: 'sans-serif' }}>Accessing secure repository data...</p>;
+  }
+
   return (
-    <div>
-      <h1 style={{ marginBottom: '20px', color: '#0f172a' }}>Active Cases Overview</h1>
-      
-      <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-        {loading ? (
-          <p style={{ padding: '20px', color: '#64748b' }}>Loading active cases...</p>
-        ) : cases.length === 0 ? (
-          <p style={{ padding: '20px', color: '#64748b' }}>No active cases found. Click 'Upload Case Data' to begin.</p>
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#334155' }}>
-                <th style={{ padding: '15px 20px' }}>Case Number</th>
-                <th style={{ padding: '15px 20px' }}>Location</th>
-                <th style={{ padding: '15px 20px' }}>AI Anthropological Profile</th>
-                <th style={{ padding: '15px 20px' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cases.map((c) => (
-                <React.Fragment key={c.id}>
-                  {/* Main Case Row */}
-                  <tr style={{ borderBottom: selectedCaseId === c.id ? 'none' : '1px solid #e2e8f0', backgroundColor: selectedCaseId === c.id ? '#f8fafc' : 'white' }}>
-                    <td style={{ padding: '15px 20px', fontWeight: '500', color: '#0f172a' }}>{c.recovery_case_number}</td>
-                    <td style={{ padding: '15px 20px', color: '#475569' }}>{c.recovery_location}</td>
-                    
-                    <td style={{ padding: '15px 20px' }}>
-                      {c.predicted_sex ? (
-                        <div>
-                          <span style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                            Analysis Complete
-                          </span>
-                          <div style={{ marginTop: '8px', fontSize: '0.9rem', color: '#475569' }}>
-                            <strong>Sex:</strong> {c.predicted_sex} | <strong>Age:</strong> {c.predicted_age_min}-{c.predicted_age_max} yrs
-                          </div>
-                        </div>
-                      ) : (
-                        <span style={{ backgroundColor: '#fef3c7', color: '#b45309', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                          Pending Analysis
-                        </span>
-                      )}
-                    </td>
-
-                    <td style={{ padding: '15px 20px' }}>
-                      {c.predicted_sex ? (
-                        <button 
-                          onClick={() => handleViewMatches(c.id)}
-                          style={{ padding: '6px 12px', backgroundColor: selectedCaseId === c.id ? '#475569' : '#0ea5e9', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}>
-                          {selectedCaseId === c.id ? 'Hide Matches' : 'View Matches'}
-                        </button>
-                      ) : (
-                        <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Awaiting AI</span>
-                      )}
-                    </td>
-                  </tr>
-
-                  {/* Expanded Matching Panel Row */}
-                  {selectedCaseId === c.id && (
-                    <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                      <td colSpan="4" style={{ padding: '0 20px 20px 20px' }}>
-                        <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '20px' }}>
-                          <h3 style={{ color: '#0f172a', marginBottom: '15px', fontSize: '1rem' }}>
-                            Cross-Reference Engine Results ({potentialMatches.length} Potential Leads Found)
-                          </h3>
-                          
-                          {loadingMatches ? (
-                            <p style={{ color: '#64748b' }}>Scanning missing persons database...</p>
-                          ) : potentialMatches.length === 0 ? (
-                            <p style={{ color: '#b45309' }}>No overlapping cases found matching this biological profile in the system.</p>
-                          ) : (
-                            <div style={{ display: 'grid', gap: '15px' }}>
-                              {potentialMatches.map((match) => (
-                                <div key={match.id} style={{ borderLeft: '4px solid #0ea5e9', paddingLeft: '15px', backgroundColor: '#fdfdfd', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '15px' }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ fontWeight: '600', color: '#0f172a', fontSize: '1.05rem' }}>
-                                      {match.first_name} {match.last_name} ({match.case_number})
-                                    </span>
-                                    {/* Calculated Match Score Badge */}
-                                    <span style={{ backgroundColor: match.match_probability > 70 ? '#dcfce7' : '#f1f5f9', color: match.match_probability > 70 ? '#15803d' : '#475569', padding: '4px 10px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                                      Match Confidence: {match.match_probability}%
-                                    </span>
-                                  </div>
-                                  
-                                  <div style={{ fontSize: '0.9rem', color: '#475569', marginTop: '6px' }}>
-                                    <strong>Biological Profile:</strong> {match.biological_sex} | {match.age_min} - {match.age_max} yrs
-                                  </div>
-                                  <div style={{ fontSize: '0.9rem', color: '#475569' }}>
-                                    <strong>Last Known Location:</strong> {match.last_known_location}
-                                  </div>
-
-                                  {/* Dynamic Link Pill for AI Detected Artifact Hits */}
-                                  {match.matched_evidence && match.matched_evidence.length > 0 && (
-                                    <div style={{ marginTop: '10px', fontSize: '0.85rem', backgroundColor: '#eff6ff', color: '#1e40af', padding: '6px 10px', borderRadius: '4px', display: 'inline-block', fontWeight: '500' }}>
-                                      🔗 Linked Evidence: {match.matched_evidence.join(', ')}
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-        )}
+    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1e293b' }}>
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>Active Forensic Index</h1>
+        <p style={{ color: '#64748b', margin: '4px 0 0 0', fontSize: '0.95rem' }}>Review core biometric logs and trigger algorithmic matching pipelines.</p>
       </div>
+
+      {cases.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '48px', backgroundColor: 'white', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+          <p style={{ color: '#64748b', margin: 0 }}>No active logs initialized in the system database.</p>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gap: '20px' }}>
+          {cases.map((c) => {
+            const isExpanded = selectedCaseId === c.id;
+            return (
+              <div key={c.id} style={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', overflow: 'hidden' }}>
+                
+                {/* Case Header Banner */}
+                <div style={{ padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: isExpanded ? '#f8fafc' : 'white', transition: 'background-color 0.2s' }}>
+                  <div style={{ display: 'flex', gap: '32px', flex: 1 }}>
+                    <div style={{ minWidth: '140px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.5px' }}>CASE IDENTITY</div>
+                      <div style={{ fontSize: '1.05rem', fontWeight: '600', color: '#0f172a', marginTop: '4px' }}>{c.recovery_case_number}</div>
+                    </div>
+                    <div style={{ minWidth: '180px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.5px' }}>RECOVERY LOCATION</div>
+                      <div style={{ fontSize: '0.95rem', color: '#334155', marginTop: '4px' }}>{c.recovery_location}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.5px' }}>BIOLOGICAL ESTIMATE</div>
+                      <div style={{ marginTop: '4px' }}>
+                        {c.predicted_sex ? (
+                          <span style={{ fontSize: '0.9rem', color: '#334155', fontWeight: '500' }}>
+                            {c.predicted_sex} (Age: {c.predicted_age_min}-{c.predicted_age_max})
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: '0.8rem', backgroundColor: '#fef3c7', color: '#d97706', padding: '2px 8px', borderRadius: '4px', fontWeight: '600' }}>
+                            Awaiting AI Parsing
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <button 
+                      onClick={() => handleViewMatches(c.id)}
+                      disabled={!c.predicted_sex}
+                      style={{ 
+                        padding: '10px 20px', 
+                        backgroundColor: !c.predicted_sex ? '#e2e8f0' : isExpanded ? '#475569' : '#0284c7', 
+                        color: !c.predicted_sex ? '#94a3b8' : 'white', 
+                        border: 'none', 
+                        borderRadius: '6px', 
+                        cursor: !c.predicted_sex ? 'not-allowed' : 'pointer', 
+                        fontWeight: '600',
+                        fontSize: '0.9rem',
+                        transition: 'background-color 0.2s'
+                      }}>
+                      {isExpanded ? 'Collapse Intel' : 'Run Cross-Reference'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Algorithmic Expansion Slot */}
+                {isExpanded && (
+                  <div style={{ padding: '24px', borderTop: '1px solid #e2e8f0', backgroundColor: '#fcfdfe' }}>
+                    <h3 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#475569', margin: '0 0 16px 0', letterSpacing: '0.5px' }}>
+                      PROBABILITY MATRIX ENGINE RESULTS ({potentialMatches.length} ALIGNED LEADS)
+                    </h3>
+
+                    {loadingMatches ? (
+                      <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Analyzing database metrics...</p>
+                    ) : potentialMatches.length === 0 ? (
+                      <p style={{ color: '#b45309', fontSize: '0.9rem', margin: 0 }}>No dynamic structural intersections found for this biometric segment.</p>
+                    ) : (
+                      <div style={{ display: 'grid', gap: '12px' }}>
+                        {potentialMatches.map((match) => (
+                          <div key={match.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                            <div>
+                              <div style={{ fontWeight: '600', color: '#0f172a', fontSize: '0.95rem' }}>
+                                {match.first_name} {match.last_name} 
+                                <span style={{ color: '#64748b', fontWeight: '400', marginLeft: '8px', fontSize: '0.85rem' }}>({match.case_number})</span>
+                              </div>
+                              <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>
+                                Biological Sex: {match.biological_sex} | Native Bounds: {match.age_min}-{match.age_max} yrs | Last Seen: {match.last_known_location}
+                              </div>
+                              {match.matched_evidence && match.matched_evidence.length > 0 && (
+                                <div style={{ marginTop: '8px', display: 'flex', gap: '6px' }}>
+                                  {match.matched_evidence.map((item, idx) => (
+                                    <span key={idx} style={{ fontSize: '0.75rem', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '4px', fontWeight: '600' }}>
+                                      Linked Item: {item}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: '700' }}>CONFIDENCE MATCH</div>
+                              <div style={{ 
+                                fontSize: '1.25rem', 
+                                fontWeight: '700', 
+                                color: match.match_probability > 70 ? '#16a34a' : '#475569',
+                                marginTop: '2px'
+                              }}>
+                                {match.match_probability}%
+                              </div>
+                            </div>
+
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
