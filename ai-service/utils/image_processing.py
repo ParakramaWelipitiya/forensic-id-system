@@ -1,4 +1,3 @@
-# ai-service/utils/image_processing.py
 import cv2
 import numpy as np
 from fastapi import HTTPException

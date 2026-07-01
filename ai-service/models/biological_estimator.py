@@ -1,14 +1,11 @@
-# ai-service/models/biological_estimator.py
 import cv2
 
 class BiologicalEstimator:
     def __init__(self):
-        # Future: self.skeletal_model = load_model('resnet_bones.pth')
         pass
 
     def estimate(self, img):
         """Analyzes physical traits to estimate biological profile"""
-        # Placeholder logic: analyzing image contrast to simulate varied data extraction
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         contrast_score = gray.std()
         

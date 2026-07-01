@@ -1,9 +1,7 @@
-# ai-service/models/artifact_detector.py
 from ultralytics import YOLO
 
 class ArtifactDetector:
     def __init__(self):
-        # Load model into memory only once when the class initializes
         self.model = YOLO('yolov8n.pt')
 
     def detect(self, img):
@@ -22,7 +20,6 @@ class ArtifactDetector:
                     if artifact_entry not in detected_artifacts:
                         detected_artifacts.append(artifact_entry)
 
-        # Calculate average confidence or default to 0.85
         avg_conf = float(results[0].boxes.conf.mean() if len(results[0].boxes) > 0 else 0.85)
 
         if not detected_artifacts:
