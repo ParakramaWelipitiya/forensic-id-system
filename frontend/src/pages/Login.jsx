@@ -1,14 +1,11 @@
-// frontend/src/pages/Login.jsx
 import { useState } from 'react';
 import axios from 'axios';
 
 export default function Login() {
-  // Your exact original state variables
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  // Your exact original login logic
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -16,11 +13,9 @@ export default function Login() {
     try {
       const response = await axios.post('http://localhost:5000/api/auth/login', { username, password });
       
-      // Save token and user details to localStorage for persistent state tracking
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('username', response.data.user.username);
       
-      // Force app refresh to re-evaluate route authentication guards
       window.location.href = '/';
     } catch (err) {
       setError(err.response?.data?.error || 'Authentication server unreachable.');
@@ -30,7 +25,6 @@ export default function Login() {
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: '#090d16', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       
-      {/* Embedded CSS for smooth hover and focus animations */}
       <style>
         {`
           .login-input {
@@ -60,9 +54,7 @@ export default function Login() {
         `}
       </style>
 
-      {/* Left Panel: Tactical Branding Area */}
       <div style={{ flex: 1.2, backgroundColor: '#0f172a', borderRight: '1px solid #1e293b', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '80px', position: 'relative', overflow: 'hidden' }}>
-        {/* Subtle dot-grid background pattern */}
         <div style={{ position: 'absolute', inset: 0, opacity: 0.05, backgroundImage: 'radial-gradient(#38bdf8 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
         
         <div style={{ position: 'relative', zIndex: 2 }}>
@@ -78,7 +70,6 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right Panel: Functional Form Area */}
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0b0f19', padding: '40px' }}>
         <div style={{ width: '100%', maxWidth: '400px' }}>
           

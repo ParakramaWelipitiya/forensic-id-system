@@ -1,4 +1,3 @@
-// frontend/src/components/Layout.jsx
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../api';
@@ -7,9 +6,8 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Settings Modal State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('general'); // 'general', 'guide', 'export', 'purge'
+  const [activeTab, setActiveTab] = useState('general');
   const [isPurging, setIsPurging] = useState(false);
   const [purgeInput, setPurgeInput] = useState('');
   const [isExporting, setIsExporting] = useState(false);
@@ -93,7 +91,6 @@ export default function Layout() {
         .profile-dots { background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; padding: 4px 12px; border-radius: 6px; transition: all 0.2s; line-height: 1;}
         .profile-dots:hover { background-color: #1e293b; color: #f8fafc; }
         
-        /* Premium Settings UI */
         .settings-overlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.65); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 100; padding: 40px; }
         .settings-container { background-color: #202124; width: 100%; max-width: 950px; height: 650px; border-radius: 12px; display: flex; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8); border: 1px solid #3c4043; color: #e8eaed; font-family: system-ui, sans-serif;}
         
@@ -140,7 +137,6 @@ export default function Layout() {
           <Link to="/registry" style={navLinkStyle('/registry')}>Missing Persons Registry</Link>
         </nav>
 
-        {/* FIXED: justifyContent instead of justify-content */}
         <div style={{ padding: '20px 24px', borderTop: '1px solid #1e293b', backgroundColor: '#0b0f19', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', letterSpacing: '0.5px' }}>OPERATOR BADGE</div>
@@ -150,12 +146,10 @@ export default function Layout() {
         </div>
       </aside>
 
-      {/* --- PREMIUM SETTINGS MODAL --- */}
       {isSettingsOpen && (
         <div className="settings-overlay" onClick={(e) => e.target.className === 'settings-overlay' && closeSettings()}>
           <div className="settings-container">
             
-            {/* Left Sidebar Menu */}
             <div className="settings-sidebar">
               <div style={{ padding: '4px 16px', marginBottom: '8px', fontSize: '0.75rem', color: '#9aa0a6', fontWeight: '700', letterSpacing: '0.5px' }}>
                 SYSTEM CONTROLS
@@ -181,7 +175,6 @@ export default function Layout() {
               </button>
             </div>
 
-            {/* Right Content Area */}
             <div className="settings-content">
               
               {activeTab === 'general' && (

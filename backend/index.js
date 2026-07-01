@@ -1,4 +1,3 @@
-// backend/index.js
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -207,8 +206,6 @@ app.get('/api/cases/:id/matches', authenticateToken, async (req, res) => {
     }
 });
 
-// --- NEW/UPDATED MISSING PERSONS ROUTES ---
-
 app.get('/api/missing', authenticateToken, async (req, res) => {
     try {
         const allMissing = await pool.query('SELECT * FROM missing_persons WHERE is_archived = FALSE ORDER BY created_at DESC');
@@ -277,7 +274,6 @@ app.delete('/api/missing/:id/permanent', authenticateToken, async (req, res) => 
     }
 });
 
-// SHARED ARCHIVE ROUTE
 app.get('/api/archive', authenticateToken, async (req, res) => {
     try {
         const archivedCases = await pool.query('SELECT * FROM unidentified_remains WHERE is_archived = TRUE ORDER BY created_at DESC');
@@ -288,8 +284,6 @@ app.get('/api/archive', authenticateToken, async (req, res) => {
     }
 });
 
-// --- GLOBAL SYSTEM DELETION ROUTE ---
-// WARNING: Permanently deletes every case and missing person from the database.
 app.delete('/api/system/purge-all', authenticateToken, async (req, res) => {
     try {
         await pool.query('DELETE FROM unidentified_remains');

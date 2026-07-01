@@ -1,4 +1,3 @@
-// frontend/src/pages/MissingPersonsRegistry.jsx
 import { useState } from 'react';
 import api from '../api';
 
@@ -7,7 +6,6 @@ export default function MissingPersonsRegistry() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // Custom Floating Toast State
   const [showToast, setShowToast] = useState(false);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,9 +18,8 @@ export default function MissingPersonsRegistry() {
     try {
       await api.post('/missing', formData);
       
-      // Trigger Success Toast Popup
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 4000); // Auto-hide after 4 seconds
+      setTimeout(() => setShowToast(false), 4000);
 
       setFormData({ caseNumber: '', firstName: '', lastName: '', ageMin: '', ageMax: '', biologicalSex: 'Unknown', heightMin: '', heightMax: '', location: '', artifacts: '' });
     } catch (err) {
@@ -45,7 +42,6 @@ export default function MissingPersonsRegistry() {
         @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
       `}</style>
 
-      {/* FLOATING SUCCESS POPUP (TOAST) */}
       {showToast && (
         <div style={{ position: 'fixed', bottom: '40px', right: '40px', backgroundColor: '#10b981', color: 'white', padding: '16px 24px', borderRadius: '8px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '12px', zIndex: 1000, animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
           <span style={{ fontSize: '1.2rem' }}>✅</span>

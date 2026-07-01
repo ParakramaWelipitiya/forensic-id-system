@@ -1,8 +1,6 @@
-// backend/db.js
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Configure the pool using variables from your .env file
 const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -11,7 +9,6 @@ const pool = new Pool({
     port: process.env.DB_PORT,
 }); 
 
-// Test the connection log
 pool.query('SELECT NOW()', (err, res) => {
     if (err) {
         console.error('Error connecting to the database:', err.stack);

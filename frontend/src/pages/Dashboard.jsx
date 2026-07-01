@@ -1,4 +1,3 @@
-// frontend/src/pages/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 
@@ -21,7 +20,6 @@ export default function Dashboard() {
 
   const [openMenuId, setOpenMenuId] = useState(null);
 
-  // --- NEW: Custom Modal State ---
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, type: null, id: null, title: '', message: '' });
   const [isProcessingModal, setIsProcessingModal] = useState(false);
 
@@ -109,7 +107,6 @@ export default function Dashboard() {
     } catch (error) { alert("Failed to save missing person edits."); }
   };
 
-  // --- NEW: Custom Modal Execution Handlers ---
   const triggerRecycleCase = (id) => {
     setOpenMenuId(null);
     setConfirmDialog({ isOpen: true, type: 'case', id, title: 'Archive Case Record', message: 'Are you sure you want to move this file to the Recycle Bin? It will be removed from active cross-referencing algorithms.' });
@@ -169,7 +166,6 @@ export default function Dashboard() {
         .dropdown-item:hover { background-color: #fef2f2; }
       `}</style>
 
-      {/* --- CUSTOM CONFIRMATION OVERLAY MODAL --- */}
       {confirmDialog.isOpen && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 100 }} onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}>
           <div style={{ background: 'white', borderRadius: '12px', width: '100%', maxWidth: '420px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', overflow: 'hidden', border: '1px solid #e2e8f0' }} onClick={(e) => e.stopPropagation()}>
@@ -214,7 +210,6 @@ export default function Dashboard() {
         <button className={`tab-btn ${activeTab === 'missing' ? 'active' : ''}`} onClick={() => setActiveTab('missing')}>MISSING PERSONS REGISTRY</button>
       </div>
 
-      {/* RENDER CASES */}
       {activeTab === 'cases' && (
         cases.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '56px 24px', backgroundColor: 'white', borderRadius: '12px', border: '1px dashed #cbd5e1' }}><p style={{ color: '#64748b', margin: 0, fontSize: '0.95rem' }}>No active cases initialized in the system.</p></div>
@@ -313,7 +308,6 @@ export default function Dashboard() {
         )
       )}
 
-      {/* RENDER MISSING PERSONS */}
       {activeTab === 'missing' && (
         missingPersons.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '56px 24px', backgroundColor: 'white', borderRadius: '12px', border: '1px dashed #cbd5e1' }}><p style={{ color: '#64748b', margin: 0, fontSize: '0.95rem' }}>No active missing persons registered in the system.</p></div>
@@ -377,7 +371,6 @@ export default function Dashboard() {
                             <>
                               <div style={{ position: 'fixed', inset: 0, zIndex: 40 }} onClick={() => setOpenMenuId(null)}></div>
                               <div className="dropdown-menu" style={{ bottom: '100%', top: 'auto', marginBottom: '4px' }}>
-                                {/* Trigger Custom Modal */}
                                 <button className="dropdown-item" onClick={() => triggerRecycleMissing(person.id)}>🗑 Move to Recycle Bin</button>
                               </div>
                             </>

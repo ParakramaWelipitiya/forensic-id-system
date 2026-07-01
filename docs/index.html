@@ -16,7 +16,6 @@
         }
         .font-mono { font-family: 'Share Tech Mono', monospace; }
         
-        /* Tactical Grid Background */
         .grid-bg {
             background-size: 50px 50px;
             background-image: 
@@ -25,7 +24,6 @@
             position: fixed; inset: 0; z-index: -2;
         }
 
-        /* Animated Scanline */
         .scanline {
             width: 100%; height: 150px;
             background: linear-gradient(to bottom, transparent, rgba(6, 182, 212, 0.1), transparent);
@@ -35,7 +33,6 @@
         }
         @keyframes scan { 0% { top: -150px; } 100% { top: 100vh; } }
 
-        /* HUD Targeting Corners */
         .hud-container { position: relative; }
         .hud-container::before, .hud-container::after,
         .hud-container .hud-inner::before, .hud-container .hud-inner::after {
@@ -50,11 +47,9 @@
             width: 30px; height: 30px; border-color: #38bdf8;
         }
 
-        /* Glowing text & borders */
         .glow-cyan { text-shadow: 0 0 15px rgba(6, 182, 212, 0.6); }
         .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(6, 182, 212, 0.2); }
         
-        /* Blinking Cursor */
         .blink { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
     </style>
@@ -241,12 +236,10 @@
             }
         }
 
-        // Initialize Scramble on Load
         document.addEventListener('DOMContentLoaded', () => {
             const el = document.getElementById('glitch-title');
             const fx = new TextScramble(el);
             
-            // Start with garbled text, then decode to the actual title
             el.innerText = 'ENCRYPTED DATA STREAM...';
             setTimeout(() => {
                 fx.setText('Identify The Unknown');

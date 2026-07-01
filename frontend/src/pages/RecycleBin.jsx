@@ -1,4 +1,3 @@
-// frontend/src/pages/RecycleBin.jsx
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 
@@ -9,7 +8,6 @@ export default function RecycleBin() {
   const [archivedMissing, setArchivedMissing] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- NEW: Custom Modal State ---
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, type: null, id: null, title: '', message: '' });
   const [isProcessingModal, setIsProcessingModal] = useState(false);
 
@@ -43,7 +41,6 @@ export default function RecycleBin() {
     } catch (error) { console.error("Failed to restore missing person:", error); }
   };
 
-  // --- NEW: Custom Modal Execution Handlers ---
   const triggerPermanentDeleteCase = (id) => {
     setConfirmDialog({ isOpen: true, type: 'case', id, title: 'CRITICAL WARNING: Permanent Purge', message: 'This action is irreversible. The case file and all linked AI inferences will be permanently destroyed. Do you wish to proceed?' });
   };
@@ -87,7 +84,6 @@ export default function RecycleBin() {
         .btn-purge:hover { background-color: #fee2e2; }
       `}</style>
 
-      {/* --- CUSTOM CONFIRMATION OVERLAY MODAL (RED WARNING) --- */}
       {confirmDialog.isOpen && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 100 }} onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}>
           <div style={{ background: 'white', borderRadius: '12px', width: '100%', maxWidth: '420px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', overflow: 'hidden', border: '2px solid #ef4444' }} onClick={(e) => e.stopPropagation()}>
