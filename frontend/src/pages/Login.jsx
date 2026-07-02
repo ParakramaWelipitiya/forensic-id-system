@@ -59,7 +59,7 @@ export default function Login() {
         
         <div style={{ position: 'relative', zIndex: 2 }}>
           <div style={{ display: 'inline-block', backgroundColor: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '6px 12px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '700', letterSpacing: '1.5px', marginBottom: '20px' }}>
-            SECURE LAW ENFORCEMENT PORTAL
+            Forensic Identity Platform
           </div>
           <h1 style={{ color: '#f8fafc', fontSize: '2.5rem', fontWeight: '800', margin: '0 0 15px 0', lineHeight: 1.2, letterSpacing: '-0.5px' }}>
             Forensic Identity<br/>& Intelligence Platform
@@ -75,7 +75,7 @@ export default function Login() {
           
           <form onSubmit={handleLogin} style={{ backgroundColor: '#111827', padding: '40px', borderRadius: '12px', border: '1px solid #1f2937', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
             <h2 style={{ color: '#f8fafc', fontSize: '1.5rem', fontWeight: '700', margin: '0 0 8px 0' }}>Operator Authorization</h2>
-            <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0 0 30px 0' }}>Enter your encrypted badge credentials to proceed.</p>
+            <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0 0 30px 0' }}>Enter your Login credentials to proceed.</p>
             
             {error && (
               <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#f87171', padding: '12px', borderRadius: '6px', marginBottom: '20px', fontSize: '0.85rem', fontWeight: '500', textAlign: 'center' }}>
@@ -92,7 +92,6 @@ export default function Login() {
               value={username} 
               onChange={(e) => setUsername(e.target.value)} 
               className="login-input" 
-              placeholder="e.g., agent001" 
             />
 
             <label style={{ fontWeight: '600', color: '#94a3b8', fontSize: '0.8rem', letterSpacing: '0.5px', display: 'block' }}>
@@ -104,7 +103,6 @@ export default function Login() {
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               className="login-input" 
-              placeholder="••••••••••••" 
             />
 
             <button type="submit" className="login-btn">

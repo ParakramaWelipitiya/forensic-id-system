@@ -139,7 +139,7 @@ export default function Layout() {
 
         <div style={{ padding: '20px 24px', borderTop: '1px solid #1e293b', backgroundColor: '#0b0f19', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', letterSpacing: '0.5px' }}>OPERATOR BADGE</div>
+            <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', letterSpacing: '0.5px' }}>OPERATOR NAME</div>
             <div style={{ fontSize: '1rem', color: '#f8fafc', fontWeight: '600', marginTop: '2px' }}>{localStorage.getItem('username') || 'Agent'}</div>
           </div>
           <button className="profile-dots" onClick={() => setIsSettingsOpen(true)}>⋮</button>
@@ -156,13 +156,13 @@ export default function Layout() {
               </div>
               
               <button className={`settings-nav-btn ${activeTab === 'general' ? 'active' : ''}`} onClick={() => setActiveTab('general')}>
-                <span style={{ fontSize: '1.1rem', width: '24px', textAlign: 'center' }}>⚙️</span> General
+                <span style={{ fontSize: '1.1rem', width: '24px', textAlign: 'center' }}> </span> General
               </button>
               <button className={`settings-nav-btn ${activeTab === 'guide' ? 'active' : ''}`} onClick={() => setActiveTab('guide')}>
-                <span style={{ fontSize: '1.1rem', width: '24px', textAlign: 'center' }}>📖</span> Professional Guide
+                <span style={{ fontSize: '1.1rem', width: '24px', textAlign: 'center' }}> </span> Professional Guide
               </button>
               <button className={`settings-nav-btn ${activeTab === 'export' ? 'active' : ''}`} onClick={() => setActiveTab('export')}>
-                <span style={{ fontSize: '1.1rem', width: '24px', textAlign: 'center' }}>💾</span> Data Controls
+                <span style={{ fontSize: '1.1rem', width: '24px', textAlign: 'center' }}> </span> Data Controls
               </button>
               
               <div style={{ flex: 1 }}></div>
@@ -171,7 +171,7 @@ export default function Layout() {
                 SECURITY
               </div>
               <button className={`settings-nav-btn ${activeTab === 'purge' ? 'active' : ''}`} onClick={() => setActiveTab('purge')} style={{ color: activeTab === 'purge' ? '#f87171' : '', backgroundColor: activeTab === 'purge' ? 'rgba(248, 113, 113, 0.1)' : '' }}>
-                <span style={{ fontSize: '1.1rem', width: '24px', textAlign: 'center' }}>⚠️</span> Danger Zone
+                <span style={{ fontSize: '1.1rem', width: '24px', textAlign: 'center' }}> </span> Clean DB
               </button>
             </div>
 
