@@ -1,10 +1,10 @@
-# Forensic Identity Platform
+# Forensic AI Cross-Reference Platform
 
 ---
 
 ## Project Overview
 
-The **Forensic Identity Platform** is a full-stack, microservice-based application engineered to assist law enforcement and forensic teams in identifying unknown human remains.
+The **Forensic AI Cross-Reference Platform** is a full-stack, microservice-based application engineered to assist law enforcement and forensic teams in identifying unknown human remains.
 
 When investigators recover unidentified remains, they upload scene imagery and preliminary data to the platform. The system utilizes a Convolutional Neural Network (**YOLOv8**) to analyze the imagery and extract physical evidence (artifacts, clothing, accessories). This data, alongside estimated biological profiles, is processed by a custom algorithmic matching engine.
 
